@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Global Support Onboarding Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <div class="ambient ambient--one"></div>
+      <div class="ambient ambient--two"></div>
+
+      <header class="masthead">
+        <div class="brand">
+          <div class="brand-mark">GS</div>
+          <h1 class="masthead-title">Global Support</h1>
+        </div>
+        <div class="masthead-actions hidden" id="masthead-app-switcher" aria-label="App switcher">
+          <div class="masthead-tabbar" role="tablist">
+            <button id="masthead-tab-main" class="masthead-tab masthead-tab--active" type="button" role="tab" aria-selected="true" data-view="main">Onboarding</button>
+            <button id="masthead-tab-reminders" class="masthead-tab" type="button" role="tab" aria-selected="false" data-view="reminders">Reminders</button>
+            <button id="masthead-tab-one-on-ones" class="masthead-tab" type="button" role="tab" aria-selected="false" data-view="one-on-ones">1:1s</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="page">
+        <section id="login-hero" class="hero card">
+          <div class="hero-copy">
+            <p class="eyebrow">Authentication Required</p>
+            <h2>Authenticate before entering the onboarding workspace.</h2>
+            <p class="lede">
+              Use a work email to open the contractor or manager view, then continue into the
+              shared onboarding record with synced progress, access tracking, and ramp targets.
+            </p>
+            <div id="demo-hints" class="hint-list"></div>
+          </div>
+
+          <form id="login-form" class="login-panel" novalidate>
+            <div class="panel-head">
+              <h3>Authenticate into a record</h3>
+              <p>Managers open their workspace and pick a contractor. Contractors open their own record.</p>
+            </div>
+            <p class="auth-note">Start here first. The workspace stays locked until you authenticate.</p>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Your work email</span>
+                <input
+                  id="viewer-email"
+                  type="email"
+                  placeholder="you@company.com"
+                  autocomplete="email"
+                  spellcheck="false"
+                  required
+                />
+              </label>
+
+              <div class="field">
+                <span>Your view</span>
+                <div class="role-toggle" role="tablist" aria-label="Choose a view">
+                  <button
+                    class="role-option role-option--active"
+                    data-role="contractor"
+                    type="button"
+                  >
+                    Contractor
+                  </button>
+                  <button class="role-option" data-role="manager" type="button">Manager</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="primary-btn" type="submit">Enter workspace</button>
+              <p id="login-message" class="inline-message" aria-live="polite"></p>
+            </div>
+          </form>
+        </section>
+
+        <section id="workspace" class="workspace hidden">
+          <div class="workspace-header">
+            <div>
+              <p id="workspace-kicker" class="eyebrow"></p>
+              <h2 id="workspace-title"></h2>
+              <p id="workspace-subtitle" class="lede lede--compact"></p>
+              <p id="workspace-message" class="inline-message workspace-message" aria-live="polite"></p>
+            </div>
+            <div class="workspace-header-actions">
+              <button
+                id="theme-toggle"
+                class="secondary-btn secondary-btn--ghost theme-toggle-btn"
+                type="button"
+              >
+                Dark mode
+              </button>
+              <button id="logout-btn" class="secondary-btn secondary-btn--ghost" type="button">
+                Back to auth
+              </button>
+              <div id="viewer-menu" class="viewer-chip viewer-chip--menu">
+                <div class="viewer-chip-main">
+                  <span id="viewer-email-chip"></span>
+                  <span id="viewer-role-chip" class="viewer-role"></span>
+                </div>
+                <button
+                  id="viewer-menu-toggle"
+                  class="chip-menu-toggle"
+                  type="button"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-label="Open user menu"
+                >
+                  ▾
+                </button>
+                <div
+                  id="viewer-menu-dropdown"
+                  class="viewer-menu-dropdown hidden"
+                  role="menu"
+                  aria-label="User menu"
+                >
+                  <button
+                    id="manager-user-settings-item"
+                    class="viewer-menu-item"
+                    type="button"
+                    role="menuitem"
+                  >
+                    Manager settings
+                  </button>
+                  <button
+                    id="tags-settings-item"
+                    class="viewer-menu-item"
+                    type="button"
+                    role="menuitem"
+                  >
+                    Label settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section id="manager-controls" class="manager-controls card hidden" aria-live="polite">
+            <div class="manager-controls-row">
+              <div class="manager-controls-label">
+                <p class="eyebrow">Manager tools</p>
+              </div>
+              <label class="field manager-controls-field">
+                <select id="manager-contractor-select"></select>
+              </label>
+              <button id="manager-plan-editor-btn" class="secondary-btn" type="button">
+                Customize plan
+              </button>
+              <button id="manager-edit-contractor-btn" class="secondary-btn" type="button">
+                Edit contractor details
+              </button>
+              <button id="manager-new-contractor-btn" class="primary-btn" type="button">
+                Onboard new contractor
+              </button>
+            </div>
+          </section>
+
+          <div id="workspace-main" class="workspace-main">
+          <section id="section-quickstart" class="quickstart card">
+            <div class="section-head section-head--split">
+              <div>
+                <p class="eyebrow">Onboarding pulse</p>
+                <h3>Next up</h3>
+                <p class="section-copy">
+                  Track the next relevant task in the current onboarding plan and keep momentum
+                  across every custom stage.
+                </p>
+              </div>
+              <div class="quickstart-badge">
+                <span id="quickstart-state-label">Active</span>
+              </div>
+            </div>
+            <div class="quickstart-grid">
+              <article class="quickstart-item">
+                <p class="summary-label">First action</p>
+                <h4 id="quickstart-task-title"></h4>
+                <p id="quickstart-task-description" class="section-copy"></p>
+                <div class="quickstart-row">
+                  <span id="quickstart-task-status" class="task-chip"></span>
+                  <button id="quickstart-action-btn" class="primary-btn" type="button"></button>
+                </div>
+              </article>
+              <article class="quickstart-item quickstart-item--progress">
+                <p class="summary-label">Plan progress</p>
+                <p id="quickstart-unlock-copy" class="section-copy"></p>
+                <div class="phase-meter">
+                  <span id="quickstart-unlock-meter"></span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <nav id="workspace-nav" class="workspace-nav" aria-label="Workspace sections">
+            <button class="pill-btn pill-btn--active" data-target="#section-quickstart" type="button">
+              Quick start
+            </button>
+            <button class="pill-btn" data-target="#section-overview" type="button">Overview</button>
+            <button class="pill-btn" data-target="#section-execution" type="button">Tasks</button>
+            <button class="pill-btn" data-target="#section-metrics" type="button">Ramp &amp; resources</button>
+          </nav>
+
+          <div id="section-overview" class="summary-grid">
+            <article class="summary-card card">
+              <p class="summary-label">My checklist</p>
+              <div class="summary-value" id="summary-my-progress">0 / 0</div>
+              <p class="summary-foot" id="summary-my-caption"></p>
+            </article>
+            <article class="summary-card card">
+              <p class="summary-label">Overall rollout</p>
+              <div class="summary-value" id="summary-overall-progress">0 / 0</div>
+              <p class="summary-foot">Combined contractor and manager tasks</p>
+            </article>
+            <article class="summary-card card">
+              <p class="summary-label">Access ready</p>
+              <div class="summary-value" id="summary-access-progress">0 / 0</div>
+              <p class="summary-foot" id="summary-access-caption"></p>
+            </article>
+            <article class="summary-card card">
+              <p class="summary-label">Current focus</p>
+              <div class="summary-text" id="summary-next-focus"></div>
+              <p class="summary-foot" id="summary-blockers"></p>
+            </article>
+          </div>
+
+          <section class="card phase-row">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Timeline</p>
+                <h3>Onboarding Phases</h3>
+              </div>
+            </div>
+            <div id="phase-list" class="phase-list"></div>
+          </section>
+
+          <section id="section-execution" class="execution-section">
+            <div class="card tasks-card">
+              <div class="section-head section-head--split">
+                <div>
+                  <p class="eyebrow">Execution board</p>
+                  <h3 id="task-panel-title">Tasks</h3>
+                  <p id="task-panel-caption" class="section-copy"></p>
+                </div>
+                <div id="task-filters" class="pill-row" role="toolbar" aria-label="Task filters">
+                  <button class="pill-btn pill-btn--active" data-filter="all" type="button">
+                    All
+                  </button>
+                  <button class="pill-btn" data-filter="mine" type="button">Mine</button>
+                  <button class="pill-btn" data-filter="attention" type="button">
+                    Needs attention
+                  </button>
+                </div>
+              </div>
+              <div id="task-list" class="task-list"></div>
+            </div>
+          </section>
+
+          <div id="section-metrics" class="detail-grid">
+            <section class="card metrics-card">
+              <div class="section-head section-head--split">
+                <div>
+                  <p class="eyebrow">Ramp targets</p>
+                  <h3 id="metrics-header-title">Months 1-3 performance expectations</h3>
+                </div>
+                <div class="section-head-actions">
+                  <button
+                    id="metrics-header-edit-btn"
+                    class="secondary-btn secondary-btn--ghost"
+                    type="button"
+                  >
+                    Rename header
+                  </button>
+                  <button
+                    id="ramp-targets-editor-btn"
+                    class="secondary-btn"
+                    type="button"
+                    aria-hidden="true"
+                  >
+                    Edit ramp targets
+                  </button>
+                </div>
+              </div>
+              <div id="metric-grid" class="metric-grid"></div>
+              <div id="phone-metrics" class="phone-metrics"></div>
+            </section>
+
+            <section class="card resources-card" id="resources-card">
+              <div class="section-head section-head--split collapsible-head" id="operating-norms-head" aria-expanded="true">
+                <div>
+                  <p class="eyebrow">Operating norms</p>
+                  <h3>Workflow expectations and internal references</h3>
+                </div>
+                <div class="section-head-actions">
+                  <button
+                    id="operating-norms-editor-btn"
+                    class="secondary-btn"
+                    type="button"
+                    aria-hidden="true"
+                  >
+                    Edit operating norms
+                  </button>
+                  <button type="button" class="collapsible-toggle" aria-label="Collapse operating norms">
+                    <span class="collapsible-chevron">▼</span>
+                  </button>
+                </div>
+              </div>
+              <div class="collapsible-body" id="operating-norms-body">
+                <div id="expectation-list" class="expectation-list"></div>
+              </div>
+              <div class="resource-block">
+                <div class="resource-block-head collapsible-head" id="internal-resources-head" aria-expanded="true">
+                  <h4>Internal resources</h4>
+                  <div class="section-head-actions">
+                    <button
+                      id="internal-resources-editor-btn"
+                      class="secondary-btn"
+                      type="button"
+                      aria-hidden="true"
+                    >
+                      Edit internal resources
+                    </button>
+                    <button type="button" class="collapsible-toggle" aria-label="Collapse internal resources">
+                      <span class="collapsible-chevron">▼</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="collapsible-body" id="internal-resources-body">
+                  <div id="resource-list" class="resource-list"></div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          </div>
+
+          <div id="view-reminders" class="workspace-subview hidden" aria-hidden="true">
+            <header class="workspace-subview-header">
+              <div class="section-head">
+                <p class="eyebrow">Reminders</p>
+                <h3>Your reminders</h3>
+                <p class="section-copy">Set reminders for yourself. Managers and contractors each see only their own.</p>
+              </div>
+            </header>
+            <div class="reminders-tabs" role="tablist" aria-label="Reminders view">
+              <button id="reminders-tab-current" type="button" role="tab" aria-selected="true" data-reminders-tab="current" class="reminders-tab reminders-tab--active">Your Reminders</button>
+              <button id="reminders-tab-past" type="button" role="tab" aria-selected="false" data-reminders-tab="past" class="reminders-tab">Past Reminders</button>
+            </div>
+            <div id="reminders-list" class="reminders-list"></div>
+            <div class="reminders-actions">
+              <button id="reminders-add-btn" class="secondary-btn" type="button">Add reminder</button>
+            </div>
+          </div>
+
+          <div id="view-one-on-ones" class="workspace-subview hidden" aria-hidden="true">
+            <header class="workspace-subview-header">
+              <div class="section-head section-head--split">
+                <div>
+                  <p class="eyebrow">1:1s</p>
+                  <h3>One-on-ones</h3>
+                  <p class="section-copy">Track scheduled 1:1s by date, keep the shared agenda in sync, and let the next meeting spin up from a blank slate or a saved template.</p>
+                </div>
+                <div class="section-head-actions">
+                  <button id="one-on-one-setup-btn" class="secondary-btn hidden" type="button">Set up 1:1</button>
+                  <button id="one-on-one-view-templates-btn" class="secondary-btn hidden" type="button">View templates</button>
+                  <button id="one-on-one-template-btn" class="secondary-btn hidden" type="button">New template</button>
+                </div>
+              </div>
+            </header>
+            <div id="one-on-ones-content" class="one-on-ones-content"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <section
+      id="profile-settings"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="profile-settings-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Record settings</p>
+            <h3 id="profile-settings-title">Who this plan covers</h3>
+          </div>
+          <button id="profile-settings-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <form id="profile-form" class="profile-form">
+          <label class="field">
+            <span>Contractor name</span>
+            <input id="profile-contractor-name" type="text" placeholder="Jamie Contractor" />
+          </label>
+          <label class="field">
+            <span>Manager name</span>
+            <input id="profile-manager-name" type="text" placeholder="Ashley Manager" />
+          </label>
+          <label class="field">
+            <span>Start date</span>
+            <input id="profile-start-date" type="date" />
+          </label>
+          <label class="field">
+            <span>Timezone</span>
+            <input id="profile-timezone" type="text" placeholder="America/New_York" />
+          </label>
+          <div class="record-meta">
+            <div>
+              <span class="meta-label">Contractor email</span>
+              <span id="profile-contractor-email"></span>
+            </div>
+            <div>
+              <span class="meta-label">Manager email</span>
+              <span id="profile-manager-email"></span>
+            </div>
+          </div>
+          <div class="actions actions--row">
+            <button class="primary-btn" type="submit">Save changes</button>
+            <button id="profile-settings-cancel" class="secondary-btn" type="button">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section
+      id="manager-settings"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="manager-settings-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Manager settings</p>
+            <h3 id="manager-settings-title">Your preferences</h3>
+          </div>
+          <button id="manager-settings-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <form id="manager-settings-form" class="profile-form">
+          <label class="field">
+            <span>Display name</span>
+            <input id="manager-display-name" type="text" placeholder="Ashley (Manager)" />
+          </label>
+          <div class="actions actions--row">
+            <button class="primary-btn" type="submit">Save</button>
+            <button id="manager-settings-cancel" class="secondary-btn" type="button">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section
+      id="tags-settings-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="tags-settings-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Label settings</p>
+            <h3 id="tags-settings-title">Labels</h3>
+          </div>
+          <button id="tags-settings-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div class="tags-settings-content">
+          <div id="tags-settings-list" class="tags-settings-list"></div>
+          <div class="tags-settings-actions">
+            <button id="tags-settings-add" class="secondary-btn" type="button">Add label</button>
+          </div>
+          <div id="tags-settings-usage-panel" class="tags-settings-usage-panel hidden"></div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="new-contractor-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="new-contractor-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--compact card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Manager tools</p>
+            <h3 id="new-contractor-title">Onboard new contractor</h3>
+          </div>
+          <button id="new-contractor-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <form id="new-contractor-form" class="profile-form">
+          <div id="new-contractor-step1" class="new-contractor-step">
+            <label class="field">
+              <span>Contractor work email</span>
+              <input
+                id="new-contractor-email"
+                type="email"
+                placeholder="new.contractor@company.com"
+                autocomplete="email"
+                spellcheck="false"
+                required
+              />
+            </label>
+            <label class="field">
+              <span>Contractor name</span>
+              <input id="new-contractor-name" type="text" placeholder="Jordan Contractor" />
+            </label>
+            <label class="field">
+              <span>Start date</span>
+              <input id="new-contractor-start-date" type="date" />
+            </label>
+            <label class="field">
+              <span>Timezone</span>
+              <input id="new-contractor-timezone" type="text" placeholder="America/New_York" />
+            </label>
+            <p id="new-contractor-message" class="inline-message" aria-live="polite"></p>
+            <div class="actions actions--row">
+              <button id="new-contractor-next-btn" class="primary-btn" type="button">Next</button>
+              <button id="new-contractor-cancel" class="secondary-btn" type="button">Cancel</button>
+            </div>
+          </div>
+          <div id="new-contractor-step2" class="new-contractor-step hidden">
+            <p class="section-copy">Choose an onboarding plan to apply to this contractor.</p>
+            <div id="new-contractor-plan-options" class="plan-options-list"></div>
+            <p id="new-contractor-step2-message" class="inline-message" aria-live="polite"></p>
+            <div class="actions actions--row">
+              <button id="new-contractor-submit-btn" class="primary-btn" type="button">Create and open record</button>
+              <button id="new-contractor-back-btn" class="secondary-btn" type="button">Back</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section
+      id="plan-editor-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="plan-editor-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split plan-editor-head">
+          <div>
+            <p class="eyebrow">Manager tools</p>
+            <h3 id="plan-editor-title">Customize onboarding plan</h3>
+            <p class="section-copy">
+              Design each stage like a small workspace with clear owners, labels, and task detail.
+            </p>
+          </div>
+          <button id="plan-editor-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <form id="plan-editor-form" class="profile-form">
+          <div class="plan-meta-grid">
+            <label class="field">
+              <span>Plan name</span>
+              <input id="plan-name" type="text" placeholder="Admissions onboarding" required />
+            </label>
+            <label class="field">
+              <span>Department</span>
+              <input id="plan-department" type="text" placeholder="Admissions" />
+            </label>
+          </div>
+          <div class="section-head section-head--split section-head--stacked">
+            <div>
+              <p class="eyebrow">Stages</p>
+              <h4>Plan structure</h4>
+              <p class="section-copy">
+                Add stages like pre-onboarding or week 1, then add the work items and owner for
+                each one.
+              </p>
+            </div>
+            <button id="plan-add-phase-btn" class="secondary-btn" type="button">Add stage</button>
+          </div>
+          <div id="plan-stage-list" class="plan-stage-list"></div>
+          <p id="plan-editor-message" class="inline-message" aria-live="polite"></p>
+          <div class="actions actions--row">
+            <button class="primary-btn" type="submit">Save onboarding plan</button>
+            <button id="plan-editor-save-template-btn" class="secondary-btn" type="button">Save as template</button>
+            <button id="plan-editor-cancel" class="secondary-btn" type="button">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section
+      id="save-template-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="save-template-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Plan templates</p>
+            <h3 id="save-template-title">Save as template</h3>
+          </div>
+          <button id="save-template-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div class="editor-panel-content">
+          <label class="field">
+            <span>Template name</span>
+            <input id="save-template-name-input" type="text" placeholder="My onboarding plan" />
+          </label>
+        </div>
+        <div class="actions actions--row">
+          <button id="save-template-save" class="primary-btn" type="button">Save</button>
+          <button id="save-template-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="ramp-targets-editor-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="ramp-targets-editor-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Ramp targets</p>
+            <h3 id="ramp-targets-editor-title">Edit ramp targets</h3>
+          </div>
+          <button id="ramp-targets-editor-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div id="ramp-targets-editor-content" class="editor-panel-content"></div>
+        <div class="actions actions--row">
+          <button id="ramp-targets-editor-save" class="primary-btn" type="button">Save</button>
+          <button id="ramp-targets-editor-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="operating-norms-editor-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="operating-norms-editor-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Operating norms</p>
+            <h3 id="operating-norms-editor-title">Edit operating norms</h3>
+          </div>
+          <button id="operating-norms-editor-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div id="operating-norms-editor-content" class="editor-panel-content"></div>
+        <div class="actions actions--row">
+          <button id="operating-norms-editor-save" class="primary-btn" type="button">Save</button>
+          <button id="operating-norms-editor-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="internal-resources-editor-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="internal-resources-editor-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Internal resources</p>
+            <h3 id="internal-resources-editor-title">Edit internal resources</h3>
+          </div>
+          <button id="internal-resources-editor-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div id="internal-resources-editor-content" class="editor-panel-content"></div>
+        <div class="actions actions--row">
+          <button id="internal-resources-editor-save" class="primary-btn" type="button">Save</button>
+          <button id="internal-resources-editor-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="reminder-editor-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="reminder-editor-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">Reminders</p>
+            <h3 id="reminder-editor-title">Add reminder</h3>
+          </div>
+          <button id="reminder-editor-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div class="editor-panel-content">
+          <label class="field">
+            <span>Title</span>
+            <input id="reminder-editor-title-input" type="text" placeholder="Reminder title" />
+          </label>
+          <label class="field field--checkbox reminder-editor-check-wrap">
+            <input id="reminder-editor-no-date" type="checkbox" />
+            <span>No due date</span>
+          </label>
+          <label class="field" id="reminder-editor-date-wrap">
+            <span>Due date</span>
+            <input id="reminder-editor-date" type="date" />
+          </label>
+        </div>
+        <div class="actions actions--row">
+          <button id="reminder-editor-save" class="primary-btn" type="button">Save</button>
+          <button id="reminder-editor-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="one-on-one-setup-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="one-on-one-setup-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">1:1 setup</p>
+            <h3 id="one-on-one-setup-title">Set up the recurring 1:1</h3>
+            <p class="section-copy">
+              Choose the meeting cadence, the first date on the in-app calendar, and whether each
+              next agenda starts blank or from a saved template.
+            </p>
+          </div>
+          <button id="one-on-one-setup-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div class="editor-panel-content">
+          <div class="plan-meta-grid">
+            <label class="field">
+              <span>Series title</span>
+              <input id="one-on-one-setup-name-input" type="text" placeholder="Jamie Contractor 1:1" />
+            </label>
+            <label class="field">
+              <span>First meeting date</span>
+              <input id="one-on-one-setup-date-input" type="date" />
+            </label>
+          </div>
+          <div class="plan-meta-grid">
+            <label class="field">
+              <span>Cadence (days)</span>
+              <input id="one-on-one-setup-cadence-input" type="number" min="1" max="90" step="1" value="7" />
+            </label>
+            <label class="field">
+              <span>Next agenda starts from</span>
+              <select id="one-on-one-setup-reset-mode">
+                <option value="template">Saved template</option>
+                <option value="clear">Blank agenda</option>
+              </select>
+            </label>
+          </div>
+          <div class="section-head section-head--split section-head--stacked">
+            <div>
+              <p class="eyebrow">Templates</p>
+              <h4>Pick an agenda template</h4>
+              <p class="section-copy">The selected template seeds each new meeting when the reset mode is set to template.</p>
+            </div>
+          </div>
+          <div id="one-on-one-setup-template-options" class="plan-options-list"></div>
+          <p id="one-on-one-setup-message" class="inline-message" aria-live="polite"></p>
+        </div>
+        <div class="actions actions--row">
+          <button id="one-on-one-setup-save" class="primary-btn" type="button">Save 1:1</button>
+          <button id="one-on-one-setup-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="one-on-one-template-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="one-on-one-template-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">1:1 templates</p>
+            <h3 id="one-on-one-template-title">Create agenda template</h3>
+            <p class="section-copy">Create the reusable notes, metrics, and action items that should appear on future 1:1s.</p>
+          </div>
+          <button id="one-on-one-template-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div class="editor-panel-content">
+          <div class="plan-meta-grid">
+            <label class="field">
+              <span>Template name</span>
+              <input id="one-on-one-template-name-input" type="text" placeholder="Weekly coaching 1:1" />
+            </label>
+            <label class="field">
+              <span>Cadence (days)</span>
+              <input id="one-on-one-template-cadence-input" type="number" min="1" max="90" step="1" value="7" />
+            </label>
+          </div>
+          <label class="field">
+            <span>Next agenda starts from</span>
+            <select id="one-on-one-template-reset-mode">
+              <option value="template">Saved template</option>
+              <option value="clear">Blank agenda</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Manager agenda items (one per line)</span>
+            <textarea id="one-on-one-template-manager-notes" rows="5" placeholder="Review wins from the week"></textarea>
+          </label>
+          <label class="field">
+            <span>Contractor prompts (one per line)</span>
+            <textarea id="one-on-one-template-contractor-points" rows="5" placeholder="Questions or support needed"></textarea>
+          </label>
+          <label class="field">
+            <span>Metrics and links (one per line, use "Label | https://...")</span>
+            <textarea id="one-on-one-template-metrics" rows="4" placeholder="Weekly QA dashboard | https://..."></textarea>
+          </label>
+          <label class="field">
+            <span>Action items (one per line)</span>
+            <textarea id="one-on-one-template-action-items" rows="4" placeholder="Send recap after the meeting"></textarea>
+          </label>
+          <p id="one-on-one-template-message" class="inline-message" aria-live="polite"></p>
+        </div>
+        <div class="actions actions--row">
+          <button id="one-on-one-template-save" class="primary-btn" type="button">Create template</button>
+          <button id="one-on-one-template-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="one-on-one-editor-overlay"
+      class="settings-overlay hidden"
+      aria-hidden="true"
+      aria-labelledby="one-on-one-editor-title"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel settings-panel--wide card">
+        <header class="section-head section-head--split">
+          <div>
+            <p class="eyebrow">1:1s</p>
+            <h3 id="one-on-one-editor-title">Add item</h3>
+          </div>
+          <button id="one-on-one-editor-close" class="secondary-btn secondary-btn--ghost" type="button">
+            Close
+          </button>
+        </header>
+        <div class="editor-panel-content">
+          <label class="field">
+            <span id="one-on-one-editor-label">Text</span>
+            <textarea id="one-on-one-editor-text" rows="4" placeholder="Enter text"></textarea>
+          </label>
+          <label class="field hidden" id="one-on-one-editor-link-wrap">
+            <span>Link (optional)</span>
+            <input id="one-on-one-editor-link" type="url" placeholder="https://..." />
+          </label>
+        </div>
+        <div class="actions actions--row">
+          <button id="one-on-one-editor-save" class="primary-btn" type="button">Save</button>
+          <button id="one-on-one-editor-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+  </html>

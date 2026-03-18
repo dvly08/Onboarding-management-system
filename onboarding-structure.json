@@ -1,0 +1,137 @@
+{
+  "schema": {
+    "task": {
+      "phase": "string",
+      "week": "integer or null",
+      "role": "contractor | manager | ops | it",
+      "title": "string",
+      "description": "string",
+      "due_relative": "string",
+      "dependencies": ["string"],
+      "links": ["string"]
+    }
+  },
+  "phases": [
+    {
+      "id": "preboarding",
+      "name": "Pre-boarding",
+      "tasks": [
+        {
+          "id": "mgr_add_to_huddle",
+          "role": "manager",
+          "title": "Add contractor to EDU Support Huddle invite",
+          "description": "Invite the contractor to the recurring EDU Support Huddle before their start date.",
+          "due_relative": "before_start",
+          "dependencies": [],
+          "links": []
+        },
+        {
+          "id": "mgr_send_welcome_email",
+          "role": "manager",
+          "title": "Send welcome email with onboarding doc",
+          "description": "Use the standard template and include the link to the contractor onboarding program.",
+          "due_relative": "before_start",
+          "dependencies": [],
+          "links": ["internal://doc/onboarding-template"]
+        }
+      ]
+    },
+    {
+      "id": "week1",
+      "name": "Week 1 - Orientation",
+      "tasks": [
+        {
+          "id": "ctr_complete_orientation_lessonly",
+          "role": "contractor",
+          "title": "Complete orientation Lessonly courses",
+          "description": "Welcome to Handshake, Global Support intro, tools overview, Zendesk basics, customer service foundations.",
+          "due_relative": "end_of_week1",
+          "dependencies": ["mgr_assign_orientation_lessonly"],
+          "links": ["internal://lessonly/orientation"]
+        },
+        {
+          "id": "mgr_check_lessonly_completion_week1",
+          "role": "manager",
+          "title": "Review Week 1 Lessonly completion",
+          "description": "Verify all assigned orientation courses show as completed and follow up on any blockers.",
+          "due_relative": "end_of_week1",
+          "dependencies": ["ctr_complete_orientation_lessonly"],
+          "links": []
+        }
+      ]
+    },
+    {
+      "id": "weeks2_5",
+      "name": "Weeks 2–5 - EDU Onboarding",
+      "tasks": [
+        {
+          "id": "mgr_set_open_limit_3",
+          "role": "manager",
+          "title": "Set EDU open ticket limit to 3",
+          "description": "Add contractor to EDU L1 group in Linear and set initial open ticket limit to 3.",
+          "due_relative": "week2_start",
+          "dependencies": [],
+          "links": []
+        },
+        {
+          "id": "ctr_attend_edu_shadows",
+          "role": "contractor",
+          "title": "Attend EDU shadow sessions",
+          "description": "Attend 2–3 EDU shadow sessions per week and ask clarifying questions.",
+          "due_relative": "end_of_week3",
+          "dependencies": ["mgr_schedule_edu_shadows"],
+          "links": []
+        }
+      ]
+    },
+    {
+      "id": "weeks6_8",
+      "name": "Weeks 6–8 - Phone Onboarding",
+      "tasks": [
+        {
+          "id": "mgr_assign_phone_buddy",
+          "role": "manager",
+          "title": "Assign phone onboarding buddy",
+          "description": "Designate a buddy for phone onboarding and align on schedule and expectations.",
+          "due_relative": "week6_start",
+          "dependencies": [],
+          "links": []
+        },
+        {
+          "id": "ctr_complete_phone_training",
+          "role": "contractor",
+          "title": "Complete phone training modules",
+          "description": "Complete Phones Overview, Let’s Talk Calls, Zendesk Talk, and Phones 101: EDU.",
+          "due_relative": "end_of_week7",
+          "dependencies": ["mgr_assign_phone_lessonly"],
+          "links": ["internal://lessonly/phones"]
+        }
+      ]
+    },
+    {
+      "id": "post_onboarding",
+      "name": "Post Onboarding - Ramp & Conversion",
+      "tasks": [
+        {
+          "id": "mgr_complete_onboarding_wrapup",
+          "role": "manager",
+          "title": "Hold onboarding wrap-up meeting",
+          "description": "Review onboarding feedback, confirm expectations going forward, and discuss growth areas.",
+          "due_relative": "end_of_week9",
+          "dependencies": [],
+          "links": []
+        },
+        {
+          "id": "mgr_review_conversion_readiness",
+          "role": "manager",
+          "title": "Review conversion readiness",
+          "description": "Evaluate quantitative metrics and qualitative behaviors; document recommendation for FTE conversion when headcount is available.",
+          "due_relative": "end_of_month3",
+          "dependencies": ["mgr_complete_onboarding_wrapup"],
+          "links": []
+        }
+      ]
+    }
+  ]
+}
+
