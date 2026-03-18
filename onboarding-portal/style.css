@@ -1600,41 +1600,39 @@ textarea {
   min-width: 0;
 }
 
-.one-on-one-series-meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin: 4px 0 20px;
+.one-on-one-series-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
 }
 
-.one-on-one-series-meta div {
-  padding: 14px 16px;
-  border-radius: 18px;
+.one-on-one-cadence-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 12px;
+  border-radius: 999px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.one-on-one-series-meta strong,
-.one-on-one-series-meta .meta-label {
-  display: block;
-}
-
-.one-on-one-series-meta strong {
-  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--muted-strong);
+  font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .one-on-one-calendar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
 .one-on-one-calendar-card {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 14px 16px;
   border-radius: 18px;
   border: 1px solid var(--line);
   background:
@@ -1645,10 +1643,9 @@ textarea {
 }
 
 .one-on-one-calendar-card-select {
-  flex: 1;
   min-width: 0;
   display: grid;
-  gap: 6px;
+  gap: 8px;
   padding: 0;
   border: none;
   border-radius: 0;
@@ -1660,9 +1657,13 @@ textarea {
 }
 
 .one-on-one-calendar-card-edit {
-  flex-shrink: 0;
+  align-self: flex-start;
   font-size: 0.8rem;
   padding: 4px 10px;
+}
+
+.one-on-one-calendar-status {
+  color: var(--muted);
 }
 
 .one-on-one-calendar-card:hover {
@@ -1872,7 +1873,15 @@ body.theme-dark .one-on-ones-cancel-btn:hover {
     grid-template-columns: 1fr;
   }
 
-  .one-on-one-series-meta {
+  .one-on-one-series-header {
+    align-items: flex-start;
+  }
+
+  .one-on-one-cadence-pill {
+    align-self: flex-start;
+  }
+
+  .one-on-one-calendar {
     grid-template-columns: 1fr;
   }
 }

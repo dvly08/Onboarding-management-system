@@ -1808,16 +1808,40 @@ function renderOneOnOnes() {
     const meetings = [...(oneOnOnes.meetings || [])].sort((a, b) =>
       (a.scheduledFor || "").localeCompare(b.scheduledFor || "")
     );
-    const meetingCards = meetings.map((meeting) => `
-      <div class="one-on-one-calendar-card${selectedMeetingId === meeting.id ? " is-active" : ""}${meeting.status === "completed" ? " is-complete" : ""}${meeting.status === "canceled" ? " is-canceled" : ""}">
-        <button type="button" class="one-on-one-calendar-card-select" data-meeting-select="${escapeHtml(String(meeting.id))}">
-          <span class="one-on-one-calendar-kicker">${escapeHtml(getOneOnOneMeetingCardLabel(meeting, meetings, oneOnOnes.currentMeetingId))}</span>
-          <strong>${escapeHtml(formatShortDate(meeting.scheduledFor))}</strong>
-          <span>${escapeHtml(getOneOnOneMeetingStatusLabel(meeting))}</span>
-        </button>
-        ${isManager ? `<button type="button" class="secondary-btn secondary-btn--ghost one-on-one-calendar-card-edit" data-action="one-on-one-edit-setup">Edit</button>` : ""}
-      </div>
-    `).join("");
+    const overviewMeetings = getOneOnOneOverviewMeetings(meetings, oneOnOnes.currentMeetingId);
+    const activeOverviewMeetingId = overviewMeetings.some(({ meeting }) => meeting.id === selectedMeetingId)
+      ? selectedMeetingId
+      : (overviewMeetings.find(({ label }) => label === "Upcoming 1:1")?.meeting.id
+        ?? overviewMeetings[0]?.meeting.id
+        ?? null);
+    const meetingCards = overviewMeetings.map(({ label, meeting }) => {
+      const statusLabel = getOneOnOneMeetingStatusLabel(meeting);
+      const meetingAriaLabel = getOneOnOneMeetingAriaLabel(label, meeting);
+      return `
+        <div class="one-on-one-calendar-card${activeOverviewMeetingId === meeting.id ? " is-active" : ""}${meeting.status === "completed" ? " is-complete" : ""}${meeting.status === "canceled" ? " is-canceled" : ""}" role="listitem">
+          <button
+            type="button"
+            class="one-on-one-calendar-card-select"
+            data-meeting-select="${escapeHtml(String(meeting.id))}"
+            aria-label="${escapeHtml(meetingAriaLabel)}"
+          >
+            <span class="one-on-one-calendar-kicker">${escapeHtml(label)}</span>
+            <strong>${escapeHtml(formatShortDate(meeting.scheduledFor))}</strong>
+            <span class="one-on-one-calendar-status">${escapeHtml(statusLabel)}</span>
+          </button>
+          ${
+            isManager
+              ? `<button
+                  type="button"
+                  class="secondary-btn secondary-btn--ghost one-on-one-calendar-card-edit"
+                  data-meeting-select="${escapeHtml(String(meeting.id))}"
+                  aria-label="${escapeHtml(`Edit ${meetingAriaLabel}`)}"
+                >Edit</button>`
+              : ""
+          }
+        </div>
+      `;
+    }).join("");
 
     elements.oneOnOnesContent.innerHTML =
       state.oneOnOneView === "detail" && selectedMeeting
@@ -2008,30 +2032,17 @@ function renderOneOnOnes() {
         <div class="plan-stage-head">
           <div class="plan-stage-intro">
             <p class="plan-stage-kicker">Recurring 1:1</p>
-            <div class="plan-stage-title-row">
+            <div class="plan-stage-title-row one-on-one-series-header">
               <h4>${escapeHtml(series.title || `${contractorName} 1:1`)}</h4>
+              <span
+                class="one-on-one-cadence-pill"
+                role="note"
+                aria-label="${escapeHtml(`Every ${series.cadenceDays} days`)}"
+              >${escapeHtml(`Every ${series.cadenceDays} days`)}</span>
             </div>
           </div>
         </div>
-        <div class="one-on-one-series-meta">
-          <div>
-            <span class="meta-label">Next meeting</span>
-            <strong>${escapeHtml(formatLongDate(series.nextMeetingDate))}</strong>
-          </div>
-          <div>
-            <span class="meta-label">Cadence</span>
-            <strong>${escapeHtml(`Every ${series.cadenceDays} days`)}</strong>
-          </div>
-          <div>
-            <span class="meta-label">Agenda reset</span>
-            <strong>${escapeHtml(series.agendaResetMode === "template" ? "Saved template" : "Blank agenda")}</strong>
-          </div>
-          <div>
-            <span class="meta-label">Template</span>
-            <strong>${escapeHtml(series.templateName || "None selected")}</strong>
-          </div>
-        </div>
-        <div class="one-on-one-calendar">${meetingCards}</div>
+        <div class="one-on-one-calendar" role="list" aria-label="Previous, upcoming, and next one-on-ones">${meetingCards}</div>
       </article>
     `;
   }
@@ -2065,12 +2076,6 @@ function renderOneOnOnes() {
 
   elements.oneOnOnesContent.onclick = async (event) => {
     const target = event.target;
-    const editSetupBtn = target.closest("[data-action='one-on-one-edit-setup']");
-    if (editSetupBtn) {
-      openOneOnOneSetupOverlay();
-      return;
-    }
-
     const backFromTemplatesBtn = target.closest("[data-action='one-on-one-back-from-templates']");
     if (backFromTemplatesBtn) {
       state.oneOnOneView = "list";
@@ -2195,21 +2200,32 @@ function getSelectedOneOnOneMeeting() {
   return fallback || null;
 }
 
-function getOneOnOneMeetingCardLabel(meeting, meetings, currentMeetingId) {
-  // Label cards relative to the current upcoming meeting instead of showing a fixed sequence number.
+function getOneOnOneOverviewMeetings(meetings, currentMeetingId) {
   const ordered = [...(Array.isArray(meetings) ? meetings : [])].sort((a, b) =>
     (a.scheduledFor || "").localeCompare(b.scheduledFor || "")
   );
+  if (!ordered.length) return [];
+
   const currentIndex = ordered.findIndex((item) => String(item.id) === String(currentMeetingId));
-  const meetingIndex = ordered.findIndex((item) => String(item.id) === String(meeting?.id));
-  if (currentIndex !== -1 && meetingIndex !== -1) {
-    if (meetingIndex === currentIndex) return "Upcoming 1:1";
-    if (meetingIndex === currentIndex - 1) return "Previous 1:1";
-    if (meetingIndex === currentIndex + 1) return "Next 1:1";
-  }
-  if (meeting?.status === "canceled") return "Canceled 1:1";
-  if (meeting?.status === "completed" || meeting?.isPast) return "Past 1:1";
-  return "1:1";
+  const upcomingIndex = currentIndex !== -1
+    ? currentIndex
+    : ordered.findIndex((item) => item.status === "scheduled");
+  const normalizedUpcomingIndex = upcomingIndex !== -1 ? upcomingIndex : 0;
+  const previousMeeting = normalizedUpcomingIndex > 0 ? ordered[normalizedUpcomingIndex - 1] : null;
+  const upcomingMeeting = ordered[normalizedUpcomingIndex] || null;
+  const nextMeeting = normalizedUpcomingIndex < ordered.length - 1
+    ? ordered[normalizedUpcomingIndex + 1]
+    : null;
+
+  return [
+    previousMeeting ? { label: "Previous 1:1", meeting: previousMeeting } : null,
+    upcomingMeeting ? { label: "Upcoming 1:1", meeting: upcomingMeeting } : null,
+    nextMeeting ? { label: "Next 1:1", meeting: nextMeeting } : null,
+  ].filter(Boolean);
+}
+
+function getOneOnOneMeetingAriaLabel(cardLabel, meeting) {
+  return `${cardLabel}. ${formatLongDate(meeting?.scheduledFor)}. ${getOneOnOneMeetingStatusLabel(meeting)}.`;
 }
 
 function getOneOnOneMeetingStatusLabel(meeting) {
